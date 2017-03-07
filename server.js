@@ -46,11 +46,7 @@ var send404NotFound = function(HTTPResponse) {
   de la requête HTTP initiale permettant d'obtenir le fichier
   HTML contenant le code JavaScript utilisant l'API WebSocket.
 **/
-httpServer.on('request', function(HTTPRequest, HTTPResponse) {
-    //console.log('HTTPRequest', HTTPRequest);
-    var parsedURL = url.parse(HTTPRequest.url, true).query;
-    //console.log(parsedURL);
-    //console.log('Événement \'request\'.');
+httpServer.on('request', function(HTTPRequest, HTTPResponse) { 
     var fs = require('fs');
     // Le fichier HTML que nous utiliserons dans tous les cas.
     var filename = 'index.html';
@@ -74,12 +70,7 @@ httpServer.on('request', function(HTTPRequest, HTTPResponse) {
 
                         writeResponse(HTTPResponse, 200, fileData);
 
-                    });
-
-
-
-
-
+                    }); 
                 }
             });
         }
@@ -141,9 +132,7 @@ webSocketServer.on('request', function(webSocketRequest) {
         //console.log('données provenant du navigateur sous forme de chaine de caractere', datasFromBrowserAsString);
 
         var datasFromBrowser = JSON.parse(datasFromBrowserAsString);
-        var datasFromServerAsString = JSON.stringify(datasFromBrowser);
-
-        // var cleanCode = sanitizeHtml(datasFromBrowser);
+        var datasFromServerAsString = JSON.stringify(datasFromBrowser); 
 
         // Envoi d'un message au client WebSocket.
         for(var i = 0; i < globalConnection.length; i++) {
