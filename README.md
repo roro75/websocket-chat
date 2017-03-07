@@ -6,6 +6,6 @@ Simple chat using Websocket, NodeJs, Javascript, MongoDB
  - NodeJs, 
  - MongoDB
   
-** Need to create MongoDB database (for example --db websocket --collection messages)**
+** __Need to create MongoDB database (for example --db websocket --collection messages)__**
 
 ![alt tag](http://romeo.lascoux.fr/git/websocket.jpg) 
