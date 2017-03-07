@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Websocket</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">
+    <style>
+
+        body {
+            text-align: center;
+            overflow: hidden;
+        }
+        h1 {
+            color: #5b077c;
+            margin: 25px;
+        }
+        ul li {
+            list-style: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+        hr{
+              border-top: 1px solid #ead7ff;
+        }
+        #form {
+            max-width: 800px;
+            margin: 0 auto;
+            display: block;
+        }
+        #messages {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        #messages>div {
+            display: table;
+        }
+        #messages div {
+            font-size: 1.3em;
+            padding: 5px;
+            color: #531f5b;
+            text-align: left;
+        }
+        #messages .date {
+            font-size: 12px;
+            color: #d7d9dc;
+            float: right;
+            margin-top: 7px;
+        }
+        #messages .message {
+            background: #fdf4ff;
+            border-radius: 10px 10px 10px;
+            padding: 10px 50px;
+            display: table;
+        }
+
+        #messages .time {
+            font-size: 12px;
+            color: #a8bdda;
+            margin: 0 15x;
+            float: right;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        label{
+          font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+          font-size:16px;
+          color:#554780;
+        }
+        input{
+          width:100%;
+        }
+        .center-block div {
+            width: 500px;
+            margin: 0 auto;
+        }
+        #envoyer {
+            margin: 5px;
+        }
+        #footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            min-height: 200px;
+            background: #efeff9;
+        }
+        #btn-envoyer {
+            line-height: 80px;
+        }
+        #footer span{
+          font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+          font-size:13px;
+          color:#a99dcc;
+        }
+
+    </style>
+    <script type="text/javascript">
+        (function(window) {
+            window.addEventListener('DOMContentLoaded', function() {
+
+                var interval;
+
+                var msg = document.getElementById("messages");
+                var footer = document.getElementById("footer");
+                var msgMaxHeight = parseFloat(window.innerHeight) - form.offsetHeight + 'px';
+
+                /**
+                 * [dataFromServerFromCollection]
+                 * @type {Object}
+                 */
+                var dataFromServerFromCollection = {{ data }};
+
+                /**
+                 *  [displayMessages]
+                 */
+                (function displayMessages(){
+
+                     for(var i in dataFromServerFromCollection){
+                        createBlocMessages(dataFromServerFromCollection[i]);
+                     }
+                })();
+
+                /**
+                 * [createBlocMessages]
+                 */
+                function createBlocMessages(data){
+
+                    var bloc = ' \
+                    <div> \
+                        <ul> \
+                            <li class="author">' + data.author + ' </li> \
+                            <li class="date"> ' + data.date + ' <span class="time">' + data.time + ' </span></li> \
+                            <li class="message">' + data.message + '</li> \
+                        </ul> \
+                    </div>';
+
+                    var msg = document.getElementById("messages");
+                    msg.innerHTML += bloc;
+                };
+
+                  scroll();
+
+                /**
+                 * [resizeMaxHeightMsg]
+                 */
+                (function resizeMaxHeightMsg() {
+                    msgMaxHeight = parseFloat(window.innerHeight) - (footer.offsetHeight*1.8) + 'px';
+                    msg.style.maxHeight = msgMaxHeight;
+                })();
+
+                /**
+                 * [scroll]
+                 */
+                function scroll(){
+                    interval = window.setInterval(function() {
+                        var msg = document.getElementById("messages");
+                        msg.scrollTop = msg.scrollHeight;
+                        clearInterval(interval);
+                    }, 100);
+                }
+
+              /**
+               * [webSocketClient]
+               * @type {WebSocket}
+               */
+                var webSocketClient = new WebSocket('ws://localhost:8888/', 'diwjs');
+
+                webSocketClient.addEventListener('open', function(event) {
+
+                    var HTMLpElement = window.document.getElementById('envoyer');
+
+                    HTMLpElement.addEventListener('submit', function(event) {
+
+                        event.preventDefault();
+                        submitForm();
+
+                    });
+
+                    window.addEventListener('keydown', function(event){
+
+                          if(event.keyCode == 13){
+                            submitForm();
+                            event.preventDefault();
+                          }
+                    });
+
+                    function submitForm(){
+
+                      var date    = new Date();
+                      var day     = date.getDay();
+                      var month   = date.getMonth();
+                      var year    = date.getFullYear();
+                      var hours   = date.getHours();
+                      var minutes = date.getMinutes();
+                      var seconds = date.getSeconds();
+
+                      //console.log(date.getTime())
+
+                      if (day <= 9) {
+                          day = '0' + day;
+                      }
+                      if (month <= 9) {
+                          month = '0' + month;
+                      }
+                      if (hours <= 9) {
+                          hours = '0' + hours;
+                      }
+                      if (minutes <= 9) {
+                          minutes = '0' + minutes;
+                      }
+                      if (seconds <= 9) {
+                          seconds = '0' + seconds;
+                      }
+
+
+                      if (message.value != '' && author.value != '') {
+
+                          var datasFromBrowser = {
+                              author: author.value,
+                              message: message.value,
+                              date: day + '/' + month + '/' + year,
+                              time: hours + ':' + minutes + ':' + seconds,
+                              getTime: date.getTime()
+                          };
+
+
+                          var datasFromBrowserAsString = JSON.stringify(datasFromBrowser);
+                          webSocketClient.send(datasFromBrowserAsString);
+
+                          message.value = '';
+                      };
+                    }
+
+                    webSocketClient.addEventListener('message', function(event) {
+                        var datasFromServerAsString = event.data;
+                        var datasFromServer = JSON.parse(event.data);
+
+                        createBlocMessages(datasFromServer);
+                        scroll();
+                    });
+                });
+
+                window.onresize = function(event) {
+                    resizeMaxHeightMsg();
+                };
+            });
+
+
+        })(window);
+    </script>
+
+</head>
+
+<body>
+    <h1>Websocket Messages</h1>
+    <hr>
+    <div class="container">
+        <div class="row">
+
+            <div class="messages" id="messages">
+
+            </div>
+
+            <div id="footer" class="col-lg-12 col-xs-12 text-center">
+
+                <div id="form">
+                    <form id="envoyer">
+                        <div class="form-group">
+                            <div class="col-lg-3">
+
+                                <label for="author">Votre nom</label>
+                                <input type="text" id="author" class="form-control" required/>
+                            </div>
+                            <div class="col-lg-7">
+
+                                <label for="message">Tapez votre message</label>
+                                <input type="text" id="message" class="form-control" required/>
+                            </div>
+                            <div id="btn-envoyer" class="col-lg-2">
+                                <input type="submit" class="btn btn-primary" value='Envoyer'>
+                            </div>
+                    </form>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-12 col-xs-12 align-left">
+                    <hr>
+                  <span>NodeJs - Websocket - javascript - MongoDB</span>
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>
